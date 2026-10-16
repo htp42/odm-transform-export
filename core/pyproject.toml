@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "odm-transform-export"
+version = "0.1.0"
+description = "Transform CDISC ODM XML exports into Medidata Rave-compatible ODM"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.10"
+dependencies = [
+    "lxml>=5.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["odm_transform_export"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

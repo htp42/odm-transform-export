@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OSB Demographics form export — "v8 after doc" fixture
+  Exercises every Rave transform fix:
+    Fix 1  : ODM namespace is a *prefix* (xmlns:odm=), not the default namespace
+    Fix 2  : osb: vendor namespace with osb:* attributes throughout
+    Fix 3  : DataType="string" on ItemDef (should be "text")
+    Fix 4  : Duplicate OrderNumber on ItemRef within the same ItemGroupDef
+    Fix 5  : mdsol:IsVisible on ItemRef (should be mdsol:Visible on ItemDef)
+    Fix 6  : Wrong canonical mdsol: names (SasLabel, IsSignatureRequired, …)
+    Fix 7  : TRUE/FALSE boolean values on mdsol: attributes
+    Fix 8  : mdsol:EntryRestriction as a *singular* attribute on FormDef (wrong)
+    Fix 9  : Label item flagged with osb:hideInput="TRUE"
+    Fix 10 : Boolean mdsol: attrs with default values (FALSE where default is No)
+    Fix 11 : Study OID / ProtocolName should be overridable via transform params
+  Also exercises pre-existing fixes: ODM-004, ODM-052, ODM-055, RAVE-001, RAVE-002,
+    RAVE-101, RAVE-110, RAVE-130, RAVE-133.
+-->
+<odm:ODM
+  xmlns:odm="http://www.cdisc.org/ns/odm/v1.3"
+  xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata"
+  xmlns:osb="http://www.openclinica.com/ns/osb/v1.0"
+  ODMVersion="1.3.2"
+  FileType="Snapshot"
+  FileOID="OSB.DM.v8"
+  CreationDateTime="2026-05-01 08:00:00.123456+00:00"
+  Granularity="All"
+  osb:version="8">
+
+  <odm:Study OID="OSB-DemographicsForm-Study-0001-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+
+    <odm:GlobalVariables>
+      <!-- Wrong child order (ODM-052): ProtocolName before StudyName -->
+      <odm:ProtocolName>DEMO-001-protocol-name-way-too-long-exceeds-fifty-chars</odm:ProtocolName>
+      <odm:StudyName>Demo Study</odm:StudyName>
+      <odm:StudyDescription>Demonstration study for OSB-to-Rave transform testing</odm:StudyDescription>
+    </odm:GlobalVariables>
+
+    <odm:MetaDataVersion OID="MDV.1" Name="v1" mdsol:DefaultMatrixOID="Default">
+
+      <!--
+        Fix 8: mdsol:EntryRestriction is a *singular attribute* — wrong.
+                Should be mdsol:EntryRestrictions (plural attr) or a child element.
+        Fix 6: mdsol:isEproForm → should be dropped (not in Rave doc).
+        Fix 7: TRUE/FALSE on mdsol: attrs.
+      -->
+      <odm:FormDef OID="F.DM" Name="Demographics" Repeating="No"
+        mdsol:EntryRestriction="Safety - Data Entry"
+        mdsol:isEproForm="FALSE">
+        <odm:ItemGroupRef ItemGroupOID="IG.DM.DEMOG" Mandatory="Yes" OrderNumber="1"/>
+      </odm:FormDef>
+
+      <!--
+        SASDatasetName exceeds 8 chars → ODM-055 fix.
+        osb:version on a child element → Fix 2.
+      -->
+      <odm:ItemGroupDef OID="IG.DM.DEMOG" Name="DEMOG" Repeating="No"
+        SASDatasetName="DM_DEMOGRAPHICS" osb:version="8">
+        <!--
+          Fix 9: label item — osb:hideInput marks this as a header/label,
+                 not a real data-collection field.
+          Fix 4: OrderNumber=1 collides with SUBJID below.
+        -->
+        <odm:ItemRef ItemOID="I.DM.LBL"      Mandatory="No"  OrderNumber="1"
+          osb:hideInput="TRUE"/>
+        <!--
+          Fix 5: mdsol:IsVisible="TRUE" on ItemRef — should be omitted
+                 (Visible="Yes" is the default, so skip-when-default applies).
+          Fix 4: OrderNumber=1 duplicates the label row above.
+        -->
+        <odm:ItemRef ItemOID="I.DM.SUBJID"   Mandatory="Yes" OrderNumber="1"
+          mdsol:IsVisible="TRUE"/>
+        <odm:ItemRef ItemOID="I.DM.RACE"     Mandatory="Yes" OrderNumber="2"/>
+        <!--
+          Fix 5: mdsol:IsVisible="FALSE" on ItemRef — must become
+                 mdsol:Visible="No" on the ItemDef.
+        -->
+        <odm:ItemRef ItemOID="I.DM.SEX"      Mandatory="Yes" OrderNumber="3"
+          mdsol:IsVisible="FALSE"/>
+        <odm:ItemRef ItemOID="I.DM.BIRTHDAT" Mandatory="No"  OrderNumber="4"/>
+        <!-- Fix 4: OrderNumber=4 duplicates BIRTHDAT above. -->
+        <odm:ItemRef ItemOID="I.DM.AGE"      Mandatory="No"  OrderNumber="4"/>
+      </odm:ItemGroupDef>
+
+      <!--
+        Fix 9: label item — will be remodeled as mdsol:LabelDef + mdsol:LabelRef.
+        Fix 2: osb:hideInput attribute stripped; osb: namespace removed.
+      -->
+      <odm:ItemDef OID="I.DM.LBL" Name="DM_LBL" DataType="text" Length="200"
+        osb:hideInput="TRUE">
+        <odm:Question>
+          <odm:TranslatedText xml:lang="en">Race (Select All That Apply)</odm:TranslatedText>
+        </odm:Question>
+      </odm:ItemDef>
+
+      <!--
+        Fix 3: DataType="string" → "text".
+        Fix 6: mdsol:SasLabel → mdsol:SASLabel.
+        Fix 6: mdsol:IsSignatureRequired → mdsol:SignatureRequired.
+        Fix 6: mdsol:IsTranslationRequired → mdsol:TranslationRequired.
+        Fix 6: mdsol:IsVisualVerify → mdsol:VisualVerify.
+        Fix 6: mdsol:IsClinicalSignificance → dropped (not in Rave doc).
+        Fix 6: mdsol:CanSetRecordDate → mdsol:CanSetItemGroupDate.
+        Fix 6: mdsol:CanSetDataPageDate → mdsol:CanSetFormDate.
+        Fix 6: mdsol:CanSetInstanceDate → mdsol:CanSetStudyEventDate.
+        Fix 7: FALSE → No on all boolean attrs.
+        Fix 10: mdsol:SignatureRequired="No" / mdsol:VisualVerify="No" /
+                mdsol:CanSetItemGroupDate="No" etc. match their defaults → stripped.
+        SASFieldName="SUBJID_LONG" exceeds 8 chars → ODM-055.
+        SDSVarName contains pipe-delimited SDTM annotation → ODM-055.
+      -->
+      <odm:ItemDef OID="I.DM.SUBJID" Name="Subject ID" DataType="string" Length="15"
+        SASFieldName="SUBJID_LONG"
+        SDSVarName="SUBJID|DOMAIN=DM|SDTM=USUBJID"
+        mdsol:SasLabel="Subject Identifier"
+        mdsol:IsSignatureRequired="FALSE"
+        mdsol:IsTranslationRequired="FALSE"
+        mdsol:IsVisualVerify="FALSE"
+        mdsol:IsClinicalSignificance="FALSE"
+        mdsol:CanSetRecordDate="FALSE"
+        mdsol:CanSetDataPageDate="FALSE"
+        mdsol:CanSetInstanceDate="FALSE"
+        mdsol:CanSetSubjectDate="No"
+        mdsol:ReadOnly="Yes">
+        <odm:Question>
+          <odm:TranslatedText xml:lang="en">Subject ID</odm:TranslatedText>
+        </odm:Question>
+      </odm:ItemDef>
+
+      <!--
+        Fix 3: DataType="string" → "text".
+        Fix 6: mdsol:SasLabel → mdsol:SASLabel.
+        Fix 7: TRUE → Yes on mdsol:Active (active=Yes is default → Fix 10 strips it).
+      -->
+      <odm:ItemDef OID="I.DM.RACE" Name="Race" DataType="string" Length="100"
+        SASFieldName="RACE"
+        mdsol:SasLabel="Race"
+        mdsol:ControlType="CheckBox"
+        mdsol:Active="TRUE"
+        osb:allowsMultiChoice="TRUE">
+        <odm:Question>
+          <odm:TranslatedText xml:lang="en">Race</odm:TranslatedText>
+        </odm:Question>
+        <odm:CodeListRef CodeListOID="CL.RACE"/>
+      </odm:ItemDef>
+
+      <!--
+        Fix 3: DataType="string" → "text".
+        Fix 5: Receives mdsol:Visible="No" from ItemRef mdsol:IsVisible="FALSE".
+        Fix 6: mdsol:SasLabel → mdsol:SASLabel.
+      -->
+      <odm:ItemDef OID="I.DM.SEX" Name="Sex" DataType="string" Length="1"
+        SASFieldName="SEX"
+        mdsol:SasLabel="Sex"
+        mdsol:ControlType="RadioButton">
+        <odm:Question>
+          <odm:TranslatedText xml:lang="en">Sex</odm:TranslatedText>
+        </odm:Question>
+        <odm:CodeListRef CodeListOID="CL.SEX"/>
+      </odm:ItemDef>
+
+      <!--
+        Fix 6: mdsol:SasLabel → mdsol:SASLabel.
+        Fix 10: SasLabel="Date of Birth" will survive (not a default-value attr).
+      -->
+      <odm:ItemDef OID="I.DM.BIRTHDAT" Name="Date of Birth" DataType="date"
+        SASFieldName="BIRTHDAT"
+        mdsol:SasLabel="Date of Birth">
+        <odm:Question>
+          <odm:TranslatedText xml:lang="en">Date of Birth</odm:TranslatedText>
+        </odm:Question>
+      </odm:ItemDef>
+
+      <!--
+        SASFieldName present but no mdsol:SasLabel → RAVE-133 will add SASLabel.
+      -->
+      <odm:ItemDef OID="I.DM.AGE" Name="Age" DataType="integer" Length="3"
+        SASFieldName="AGE">
+        <odm:Question>
+          <odm:TranslatedText xml:lang="en">Age (years)</odm:TranslatedText>
+        </odm:Question>
+      </odm:ItemDef>
+
+      <!-- CodeList DataType="string" is valid — must NOT be changed (Fix 3 scope). -->
+      <odm:CodeList OID="CL.RACE" Name="Race" DataType="string">
+        <odm:CodeListItem CodedValue="WHITE" OrderNumber="1">
+          <odm:Decode>
+            <odm:TranslatedText xml:lang="en">White</odm:TranslatedText>
+          </odm:Decode>
+        </odm:CodeListItem>
+        <odm:CodeListItem CodedValue="BLACK OR AFRICAN AMERICAN" OrderNumber="2">
+          <odm:Decode>
+            <odm:TranslatedText xml:lang="en">Black or African American</odm:TranslatedText>
+          </odm:Decode>
+        </odm:CodeListItem>
+      </odm:CodeList>
+
+      <!-- OrderNumber on CodeListItem must be removed (RAVE-101). -->
+      <odm:CodeList OID="CL.SEX" Name="Sex" DataType="string">
+        <odm:CodeListItem CodedValue="M" OrderNumber="1">
+          <odm:Decode>
+            <odm:TranslatedText xml:lang="en">Male</odm:TranslatedText>
+          </odm:Decode>
+        </odm:CodeListItem>
+        <odm:CodeListItem CodedValue="F" OrderNumber="2">
+          <odm:Decode>
+            <odm:TranslatedText xml:lang="en">Female</odm:TranslatedText>
+          </odm:Decode>
+        </odm:CodeListItem>
+      </odm:CodeList>
+
+    </odm:MetaDataVersion>
+  </odm:Study>
+</odm:ODM>

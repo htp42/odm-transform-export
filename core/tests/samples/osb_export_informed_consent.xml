@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ODM xmlns:odm="http://www.cdisc.org/ns/odm/v1.3" ODMVersion="1.3.2" FileType="Snapshot" FileOID="OID.1792151433612" CreationDateTime="2026-10-16 11:50:33.612012+00:00" Granularity="All" xmlns:osb="http://openstudybuilder.org" xmlns:veeva="http://veeva.com">
+	<Study OID="Informed Consent and Demography-OdmForm_000001">
+		<GlobalVariables>
+			<ProtocolName>Informed Consent and Demography</ProtocolName>
+			<StudyName>Informed Consent and Demography</StudyName>
+			<StudyDescription>Informed Consent and Demography</StudyDescription>
+		</GlobalVariables>
+		<BasicDefinitions/>
+		<MetaDataVersion OID="MDV.0.1" Name="MDV.0.1" Description="Draft version">
+			<FormDef OID="F.DM" Name="Informed Consent and Demography" Repeating="No" osb:version="0.1">
+				<Description>
+					<TranslatedText xml:lang="en">Informed Consent and Demography form</TranslatedText>
+				</Description>
+				<osb:DesignNotes>
+					<TranslatedText xml:lang="en">For paediatric studies, please evaluate if study specific CRF is needed...</TranslatedText>
+				</osb:DesignNotes>
+				<osb:CompletionInstructions>
+					<TranslatedText xml:lang="en">Please complete this Informed Consent and Demography form at the very beginning of the study
+
+General item design notes:
+Integration: A: Argus, Ax: Forms attached in Argus, C: CPR Dashboard, IW: IWRS, P: Impact, R: Reports, RT: RTSM
+
+General item design notes:  Integration: A: Argus, Ax: 
+
+rms attached in Argus, C: CPR Dashboard, IW: IWRS, P: Impact, R: Reports, RT: RTSM
+
+Oracle item des
+N notes:  Key: [*] = Item is required.  Sex: Populated by IWRS. Item to trigger Childbearing potential form to appear if response = Female.  Subject No.: Populated by IWRS and mapped from ENR to Inf Cons/DemogOracle item design notes:  Key: [*] = Item is required.  Sex: Populated by IWRS. Item to trigger Childbearing potential form to appear if response = Female.  Subject No.: Populated by IWRS and mapped from ENR to Inf Cons/Demog</TranslatedText>
+				</osb:CompletionInstructions>
+				<osb:DisplayText>
+					<TranslatedText xml:lang="en">Informed Consent and Demography (Inf Cons/Demog)</TranslatedText>
+				</osb:DisplayText>
+				<Alias Name="Item design notes: Key: [*] = Item is required. Integration: A Argrrrs, Ax: Forms attached in Argrrrs. Sex (at birth): Populated by..." Context="Oracle"/>
+				<ItemGroupRef ItemGroupOID="G.DM.IC" Mandatory="Yes" OrderNumber="1"/>
+				<ItemGroupRef ItemGroupOID="G.DM.DM" Mandatory="Yes" OrderNumber="2"/>
+			</FormDef>
+			<ItemGroupDef OID="G.DM.DM" Name="General Demography" Repeating="No" Purpose="Tabulation" SASDatasetName="DEMOG" Domain="DM:Demographics Domain" osb:version="0.1">
+				<osb:DomainColor>DM:#bfffff !important;</osb:DomainColor>
+				<Description>
+					<TranslatedText xml:lang="en">General Demographic item group</TranslatedText>
+				</Description>
+				<osb:CompletionInstructions>
+					<TranslatedText xml:lang="en">Please complete this General Demographic item group  at the very beginning of the study</TranslatedText>
+				</osb:CompletionInstructions>
+				<ItemRef ItemOID="I.BRTHDTCARGUS" Mandatory="Yes" OrderNumber="1"/>
+				<ItemRef ItemOID="I.BRTHDTC" Mandatory="Yes" OrderNumber="2"/>
+				<ItemRef ItemOID="I.AGE" Mandatory="Yes" OrderNumber="3"/>
+				<ItemRef ItemOID="I.SEX" Mandatory="No" OrderNumber="4"/>
+				<ItemRef ItemOID="I.SEXDEA" Mandatory="Yes" OrderNumber="5"/>
+				<ItemRef ItemOID="I.ETHNIC" Mandatory="Yes" OrderNumber="6"/>
+				<ItemRef ItemOID="I.RACE" Mandatory="Yes" OrderNumber="7"/>
+				<ItemRef ItemOID="I.RACEOTH" Mandatory="No" OrderNumber="8"/>
+				<ItemRef ItemOID="I.SUBJID1" Mandatory="Yes" OrderNumber="9"/>
+				<ItemRef ItemOID="I.PREVSUBJ" Mandatory="No" OrderNumber="10"/>
+			</ItemGroupDef>
+			<ItemGroupDef OID="G.DM.IC" Name="Informed Consent" Repeating="No" Purpose="Tabulation" SASDatasetName="DEMOG" Domain="DM:Demographics Domain|DS:Disposition Domain" osb:version="0.1">
+				<osb:DomainColor>DM:#bfffff !important;</osb:DomainColor>
+				<osb:DomainColor>DS:#ffff96 !important;</osb:DomainColor>
+				<Description>
+					<TranslatedText xml:lang="en">Informed Consent item group</TranslatedText>
+				</Description>
+				<osb:CompletionInstructions>
+					<TranslatedText xml:lang="en">Please complete the Informed Consent item group  before any other information</TranslatedText>
+				</osb:CompletionInstructions>
+				<osb:DisplayText>
+					<TranslatedText xml:lang="en">Informed Consent (Inf Cons)</TranslatedText>
+				</osb:DisplayText>
+				<Alias Name="DS:DSCAT=PROTOCOL MILESTONE" Context="Sdtm"/>
+				<Alias Name="DS:DSDECOD=INFORMED CONSENT OBTAINED" Context="Sdtm"/>
+				<Alias Name="Note: If multiple Informed Consent dates are availables, then the latest date is RFICDTC" Context="Sdtm"/>
+				<Alias Name="Note: [SUbJECT_INFO_2] - Non-repeating" Context="Sdtm"/>
+				<ItemRef ItemOID="I.STUDYID1" Mandatory="Yes" OrderNumber="1"/>
+				<ItemRef ItemOID="I.RFICDAT" Mandatory="Yes" OrderNumber="2"/>
+				<ItemRef ItemOID="I.RFICTIM" Mandatory="Yes" OrderNumber="3"/>
+				<ItemRef ItemOID="I.RFICDATLAR1" Mandatory="No" OrderNumber="4"/>
+				<ItemRef ItemOID="I.RFICTIMLAR1" Mandatory="No" OrderNumber="5"/>
+				<ItemRef ItemOID="I.RFICDATLAR2" Mandatory="No" OrderNumber="6"/>
+				<ItemRef ItemOID="I.RFICTIMLAR2" Mandatory="No" OrderNumber="7"/>
+			</ItemGroupDef>
+			<ItemDef OID="I.AGE" Name="Age" Origin="Collected Value" DataType="integer" Length="3" SignificantDigits="0" SASFieldName="AGE" SDSVarName="AGE" osb:version="0.1">
+				<Description>
+					<TranslatedText xml:lang="en">Age</TranslatedText>
+				</Description>
+				<osb:CompletionInstructions>
+					<TranslatedText xml:lang="en">The Age could be derived from the Date of Birth</TranslatedText>
+				</osb:CompletionInstructions>
+				<Alias Name="Note: RACE, When more than one selected, RACE=MULTIPLE and individual responses are RACE1, RACE2, etc. in SUPPDM" Context="Sdtm"/>
+			</ItemDef>
+			<ItemDef OID="I.RFICDAT" Name="Date informed consent obtained" Origin="Collected Value" DataType="date" SignificantDigits="0" SASFieldName="RFICDAT" SDSVarName="DM:RFICDTC|DS:DSSTDTC" osb:version="0.1">
+				<Description>
+					<TranslatedText xml:lang="en">Informed Consent DATE</TranslatedText>
+				</Description>
+				<osb:CompletionInstructions>
+					<TranslatedText xml:lang="en">This will be the same information on informed consent used in the SDTM Disposition domain</TranslatedText>
+				</osb:CompletionInstructions>
+				<Alias Name="DS:DSTERM=INFORMED CONSENT OBTAINED" Context="Sdtm"/>
+			</ItemDef>
+			<ItemDef OID="I.RFICDATLAR2" Name="Date informed consent obtained by Parents/Legally Acceptable Representative (LAR) Only to be completed in countries where Informed Consent from both parents is required [de-activated]" Origin="Collected Value" DataType="date" SignificantDigits="0" SASFieldName="RFICDAT" SDSVarName="DM:RFICDTC|DS:DSSTDTC" osb:version="0.1">
+				<Description>
+					<TranslatedText xml:lang="en">Informed Consent DATE (Legal or authorised representative 2)</TranslatedText>
+				</Description>
+				<osb:CompletionInstructions>
+					<TranslatedText xml:lang="en">This will be the same information on informed consent used in the SDTM Disposition domain</TranslatedText>
+				</osb:CompletionInstructions>
+				<Alias Name="DS:DSTERM=LEGAL OR AUTHORISED REPRESENTATIVE 2" Context="Sdtm"/>
+			</ItemDef>
+			<ItemDef OID="I.RFICDATLAR1" Name="Date informed consent obtained by Parents/Legally Acceptable Representative (LAR) [de-activated]" Origin="Collected Value" DataType="date" SignificantDigits="0" SASFieldName="RFICDAT" SDSVarName="DM:RFICDTC|DS:DSSTDTC" osb:version="0.1">
+				<Description>
+					<TranslatedText xml:lang="en">Informed Consent Date (Legal or authorised representative 1)</TranslatedText>
+				</Description>
+				<osb:CompletionInstructions>
+					<TranslatedText xml:lang="en">This will be the same information on informed consent used in the SDTM Disposition domain</TranslatedText>
+				</osb:CompletionInstructions>
+				<Alias Name="DS:DSTERM=LEGAL OR AUTHORISED REPRESENTATIVE 1" Context="Sdtm"/>
+			</ItemDef>
+			<ItemDef OID="I.BRTHDTC" Name="Date of birth" Origin="Collected Value" DataType="date" SignificantDigits="0" SASFieldName="BRTHDAT" SDSVarName="DM:BRTHDTC" osb:version="0.1">
+				<Description>
+					<TranslatedText xml:lang="en">Date of birth</TranslatedText>
+				</Description>
+				<osb:CompletionInstructions>
+					<TranslatedText xml:lang="en">If collected, please provide the most complete Date of birth</TranslatedText>
+				</osb:CompletionInstructions>
+			</ItemDef>
+			<ItemDef OID="I.BRTHDTCARGUS" Name="Date of birth (only for Argus interface) [hidden]" Origin="Collected Value" DataType="date" SignificantDigits="0" SASFieldName="BRTHDAT" SDSVarName="BRTHDTC" osb:version="0.1">
+				<Description>
+					<TranslatedText xml:lang="en">Date of birth (only for Argus interface) [hidden]</TranslatedText>
+				</Description>
+			</ItemDef>
+			<ItemDef OID="I.ETHNIC" Name="Ethnicity" Origin="Collected Value" DataType="string" Length="20" SignificantDigits="0" SASFieldName="ETHNIC" SDSVarName="DM:ETHNIC" osb:version="0.1">
+				<Description>
+					<TranslatedText xml:lang="en">Ethnicity</TranslatedText>
+				</Description>
+				<CodeListRef CodeListOID="ETHNIC@I.ETHNIC" osb:allowsMultiChoice="False"/>
+			</ItemDef>
+			<ItemDef OID="I.RFICTIMLAR1" Name="Informed Consent TIME obtained by Parents/Legally Acceptable Representative (LAR) [de-activated]" Origin="Collected Value" DataType="time" SignificantDigits="0" SASFieldName="RFICTIM" SDSVarName="RFICDTC, DSSTDTC" osb:version="0.1">
+				<Description>
+					<TranslatedText xml:lang="en">Informed Consent Time (Legal or authorised representative 1)</TranslatedText>
+				</Description>
+				<osb:CompletionInstructions>
+					<TranslatedText xml:lang="en">This will be the same information on informed consent used in the SDTM Disposition domain</TranslatedText>
+				</osb:CompletionInstructions>
+			</ItemDef>
+			<ItemDef OID="I.RFICTIMLAR2" Name="Informed Consent Time obtained by Parents/Legally Acceptable Representative (LAR) Only to be completed in countries where Informed Consent from both parents is required [de-activated]" Origin="Collected Value" DataType="time" SignificantDigits="0" SASFieldName="RFICTIM" SDSVarName="RFICDTC, DSSTDTC" osb:version="0.1">
+				<Description>
+					<TranslatedText xml:lang="en">Informed Consent Time (Legal or authorised representative 2)</TranslatedText>
+				</Description>
+				<osb:CompletionInstructions>
+					<TranslatedText xml:lang="en">This will be the same information on informed consent used in the SDTM Disposition domain</TranslatedText>
+				</osb:CompletionInstructions>
+			</ItemDef>
+			<ItemDef OID="I.PREVSUBJ" Name="Previous Subject No." Origin="Collected Value" DataType="string" Length="10" SignificantDigits="0" SASFieldName="PREVSUBJ" SDSVarName="PREVSUBJ in SUPPDM" osb:version="0.1">
+				<Description>
+					<TranslatedText xml:lang="en">Previous Subject No.</TranslatedText>
+				</Description>
+			</ItemDef>
+			<ItemDef OID="I.RACE" Name="Race" Origin="Collected Value" DataType="string" Length="40" SignificantDigits="0" SASFieldName="RACE" SDSVarName="DM:RACE" osb:version="0.1">
+				<Description>
+					<TranslatedText xml:lang="en">Race</TranslatedText>
+				</Description>
+				<CodeListRef CodeListOID="RACE@I.RACE" osb:allowsMultiChoice="False"/>
+			</ItemDef>
+			<ItemDef OID="I.RACEOTH" Name="Race other" Origin="Collected Value" DataType="string" Length="40" SignificantDigits="0" SASFieldName="RACEOTH" SDSVarName="RACEOTH in SUPPDM" osb:version="0.1">
+				<Description>
+					<TranslatedText xml:lang="en">Race other</TranslatedText>
+				</Description>
+				<Alias Name="1" Context="osb:indentLevel"/>
+			</ItemDef>
+			<ItemDef OID="I.SEXDEA" Name="Sex [de-activated]" Origin="Protocol Value" DataType="string" Length="15" SignificantDigits="0" SASFieldName="SEX" SDSVarName="SEX" osb:version="0.1">
+				<Description>
+					<TranslatedText xml:lang="en">Sex [de-activated],'Male' or 'Female' to be defaulted</TranslatedText>
+				</Description>
+				<CodeListRef CodeListOID="SEX@I.SEXDEA" osb:allowsMultiChoice="False"/>
+			</ItemDef>
+			<ItemDef OID="I.SEX" Name="Sex [read-only]" Origin="Collected Value" DataType="string" Length="15" SignificantDigits="0" SASFieldName="SEX" SDSVarName="DM:SEX" osb:version="0.1">
+				<Description>
+					<TranslatedText xml:lang="en">Sex [read-only]</TranslatedText>
+				</Description>
+				<CodeListRef CodeListOID="SEX@I.SEX" osb:allowsMultiChoice="False"/>
+			</ItemDef>
+			<ItemDef OID="I.STUDYID1" Name="Study ID" Origin="Protocol Value" DataType="string" Length="11" SignificantDigits="0" SASFieldName="STUDYID" SDSVarName="STUDYID" osb:version="0.1">
+				<Description>
+					<TranslatedText xml:lang="en">Study Identifier</TranslatedText>
+				</Description>
+				<osb:CompletionInstructions>
+					<TranslatedText xml:lang="en">Although this field is not typically captured on a CRF, it should be displayed clearly on the CRF and/or the EDC system. This field can be included into the database or populated during SDTM-based dataset creation before submission.</TranslatedText>
+				</osb:CompletionInstructions>
+			</ItemDef>
+			<ItemDef OID="I.SUBJID1" Name="Subject No. [read-only]" Origin="Collected Value" DataType="string" Length="10" SignificantDigits="0" SASFieldName="SUBJID" SDSVarName="SUBJID" osb:version="0.1">
+				<Description>
+					<TranslatedText xml:lang="en">Subject No.</TranslatedText>
+				</Description>
+			</ItemDef>
+			<ItemDef OID="I.RFICTIM" Name="Time informed consent obtained" Origin="Collected Value" DataType="time" SignificantDigits="0" SASFieldName="RFICTIM" SDSVarName="DM:RFICDTC|DS:DSSTDTC" osb:version="0.1">
+				<Description>
+					<TranslatedText xml:lang="en">Informed Consent time</TranslatedText>
+				</Description>
+				<osb:CompletionInstructions>
+					<TranslatedText xml:lang="en">This will be the same information on informed consent used in the SDTM Disposition domain</TranslatedText>
+				</osb:CompletionInstructions>
+				<Alias Name="DS:DSTERM=INFORMED CONSENT OBTAINED" Context="Sdtm"/>
+			</ItemDef>
+			<CodeList OID="ETHNIC@I.ETHNIC" Name="C66790" DataType="string" SASFormatName="ETHNIC" osb:version="1.0">
+				<CodeListItem CodedValue="HISPANIC OR LATINO" OrderNumber="1" osb:name="Hispanic or Latino" osb:oid="C17459" osb:mandatory="True" osb:version="1.0">
+					<Decode>
+						<TranslatedText xml:lang="en">Hispanic or Latino</TranslatedText>
+					</Decode>
+				</CodeListItem>
+				<CodeListItem CodedValue="NOT HISPANIC OR LATINO" OrderNumber="2" osb:name="Not Hispanic or Latino" osb:oid="C41222" osb:mandatory="True" osb:version="1.0">
+					<Decode>
+						<TranslatedText xml:lang="en">Not Hispanic or Latino</TranslatedText>
+					</Decode>
+				</CodeListItem>
+			</CodeList>
+			<CodeList OID="RACE@I.RACE" Name="C74457" DataType="string" SASFormatName="RACE" osb:version="1.0">
+				<CodeListItem CodedValue="AMERICAN INDIAN OR ALASKA NATIVE" OrderNumber="1" osb:name="American Indian or Alaska Native" osb:oid="C41259" osb:mandatory="True" osb:version="1.0">
+					<Decode>
+						<TranslatedText xml:lang="en">American Indian or Alaska Native</TranslatedText>
+					</Decode>
+				</CodeListItem>
+				<CodeListItem CodedValue="ASIAN" OrderNumber="2" osb:name="Asian" osb:oid="C41260" osb:mandatory="True" osb:version="1.0">
+					<Decode>
+						<TranslatedText xml:lang="en">Asian</TranslatedText>
+					</Decode>
+				</CodeListItem>
+				<CodeListItem CodedValue="BLACK OR AFRICAN AMERICAN" OrderNumber="3" osb:name="Black or African American" osb:oid="C16352" osb:mandatory="True" osb:version="1.0">
+					<Decode>
+						<TranslatedText xml:lang="en">Black or African American</TranslatedText>
+					</Decode>
+				</CodeListItem>
+				<CodeListItem CodedValue="NATIVE HAWAIIAN OR OTHER PACIFIC ISLANDER" OrderNumber="4" osb:name="Native Hawaiian or Other Pacific Islander" osb:oid="C41219" osb:mandatory="True" osb:version="1.0">
+					<Decode>
+						<TranslatedText xml:lang="en">Native Hawaiian or Other Pacific Islander</TranslatedText>
+					</Decode>
+				</CodeListItem>
+				<CodeListItem CodedValue="WHITE" OrderNumber="5" osb:name="White" osb:oid="C41261" osb:mandatory="True" osb:version="1.0">
+					<Decode>
+						<TranslatedText xml:lang="en">White</TranslatedText>
+					</Decode>
+				</CodeListItem>
+			</CodeList>
+			<CodeList OID="SEX@I.SEXDEA" Name="C66731" DataType="string" SASFormatName="SEX" osb:version="2.0">
+				<CodeListItem CodedValue="F" OrderNumber="2" osb:name="Female" osb:oid="C16576" osb:mandatory="True" osb:version="1.0">
+					<Decode>
+						<TranslatedText xml:lang="en">Female</TranslatedText>
+					</Decode>
+				</CodeListItem>
+				<CodeListItem CodedValue="M" OrderNumber="1" osb:name="Male" osb:oid="C20197" osb:mandatory="True" osb:version="1.0">
+					<Decode>
+						<TranslatedText xml:lang="en">Male</TranslatedText>
+					</Decode>
+				</CodeListItem>
+			</CodeList>
+			<CodeList OID="SEX@I.SEX" Name="C66731" DataType="string" SASFormatName="SEX" osb:version="2.0">
+				<CodeListItem CodedValue="F" OrderNumber="2" osb:name="Female" osb:oid="C16576" osb:mandatory="True" osb:version="1.0">
+					<Decode>
+						<TranslatedText xml:lang="en">Female</TranslatedText>
+					</Decode>
+				</CodeListItem>
+				<CodeListItem CodedValue="M" OrderNumber="1" osb:name="Male" osb:oid="C20197" osb:mandatory="True" osb:version="1.0">
+					<Decode>
+						<TranslatedText xml:lang="en">Male</TranslatedText>
+					</Decode>
+				</CodeListItem>
+			</CodeList>
+		</MetaDataVersion>
+	</Study>
+</ODM>

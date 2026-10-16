@@ -1,0 +1,18 @@
+{
+  "OdmTransformExport": {
+    "menu_label": "Export for Medidata Rave",
+    "title": "Export for Medidata Rave",
+    "description": "Exports the {count} form(s) of the current preview as ODM XML that Medidata Rave can import. Everything that can be fixed automatically is fixed; the rest is listed for manual review.",
+    "study_oid": "Rave study OID",
+    "study_oid_hint": "Optional. Rave uses the Study OID to match the target project.",
+    "protocol_name": "Rave protocol name",
+    "protocol_name_hint": "Optional. Rave's project name. Defaults to the exported protocol name, truncated to 50 characters.",
+    "export": "Export",
+    "downloaded": "Downloaded {filename}, with {count} change(s) applied.",
+    "manual_review": "{count} issue(s) could not be fixed automatically. Resolve them in OpenStudyBuilder, or in Rave after the import.",
+    "applied_changes": "Applied changes ({count})",
+    "rule": "Rule",
+    "location": "Location",
+    "issue": "Issue"
+  }
+}
