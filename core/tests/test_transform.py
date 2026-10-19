@@ -465,3 +465,94 @@ class TestSchemaConformance:
             assert len(val) <= 8, (
                 f"ItemGroupDef OID='{el.get('OID')}' SASDatasetName='{val}' exceeds 8 chars"
             )
+
+
+# ── ODM-059 / ODM-060: FormDef and ItemGroupDef child order ──────────────────
+
+_DEF_ORDER_XML = b"""<?xml version="1.0"?>
+<ODM xmlns="http://www.cdisc.org/ns/odm/v1.3"
+     xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata"
+     FileType="Snapshot" FileOID="T" CreationDateTime="2026-01-01T00:00:00" ODMVersion="1.3">
+  <Study OID="S">
+    <GlobalVariables><StudyName>s</StudyName><StudyDescription>d</StudyDescription><ProtocolName>p</ProtocolName></GlobalVariables>
+    <MetaDataVersion OID="M" Name="v">
+      <FormDef OID="F1" Name="F" Repeating="No">
+        <Alias Context="ctx" Name="a"/>
+        <ItemGroupRef ItemGroupOID="IG1" Mandatory="Yes" OrderNumber="1"/>
+        <Description><TranslatedText xml:lang="en">f</TranslatedText></Description>
+        <ItemGroupRef ItemGroupOID="IG2" Mandatory="Yes" OrderNumber="2"/>
+      </FormDef>
+      <ItemGroupDef OID="IG1" Name="G1" Repeating="No">
+        <Alias Context="ctx" Name="a"/>
+        <ItemRef ItemOID="I1" Mandatory="Yes" OrderNumber="1"/>
+        <mdsol:LabelRef LabelOID="L1" OrderNumber="2"/>
+        <ItemRef ItemOID="I2" Mandatory="Yes" OrderNumber="3"/>
+      </ItemGroupDef>
+      <ItemGroupDef OID="IG2" Name="G2" Repeating="No">
+        <Alias Context="ctx" Name="b"/>
+        <ItemRef ItemOID="I3" Mandatory="Yes" OrderNumber="4"/>
+      </ItemGroupDef>
+      <ItemGroupDef OID="IG3" Name="G3" Repeating="No">
+        <Description><TranslatedText xml:lang="en">g</TranslatedText></Description>
+        <ItemRef ItemOID="I4" Mandatory="Yes" OrderNumber="1"/>
+        <Alias Context="ctx" Name="c"/>
+      </ItemGroupDef>
+    </MetaDataVersion>
+  </Study>
+</ODM>"""
+
+
+def _child_names(el: etree._Element) -> list[str]:
+    return [
+        ("mdsol:" if etree.QName(c).namespace == MDSOL_NS else "")
+        + etree.QName(c).localname
+        for c in el
+    ]
+
+
+class TestDefChildOrder:
+    @pytest.fixture(autouse=True)
+    def _transform(self, tmp_path):
+        src = tmp_path / "defs.xml"
+        src.write_bytes(_DEF_ORDER_XML)
+        self.result, xml_bytes = transform_file(src, edc="rave")
+        self.root = parse(xml_bytes)
+
+    def _get(self, tag: str, oid: str) -> etree._Element:
+        return self.root.find(f".//{{{ODM_NS}}}{tag}[@OID='{oid}']")
+
+    def test_formdef_children_in_odm_order(self):
+        form = self._get("FormDef", "F1")
+        assert _child_names(form) == ["Description", "ItemGroupRef", "ItemGroupRef", "Alias"]
+        # stable: ItemGroupRef keep their relative order
+        assert [c.get("ItemGroupOID") for c in form[1:3]] == ["IG1", "IG2"]
+
+    def test_itemgroupdef_children_in_odm_order_mdsol_last(self):
+        group = self._get("ItemGroupDef", "IG1")
+        # RAVE-117 still holds: mdsol:LabelRef after every ItemRef
+        assert _child_names(group) == ["ItemRef", "ItemRef", "Alias", "mdsol:LabelRef"]
+        assert [c.get("ItemOID") for c in group[:2]] == ["I1", "I2"]
+        assert _child_names(self._get("ItemGroupDef", "IG2")) == ["ItemRef", "Alias"]
+
+    def test_only_out_of_order_defs_reported(self):
+        reported = [
+            (c.rule, c.location.rpartition("/")[2])
+            for c in self.result.changes if c.rule in ("ODM-059", "ODM-060")
+        ]
+        assert reported == [
+            ("ODM-059", "FormDef[@OID='F1']"),
+            ("ODM-060", "ItemGroupDef[@OID='IG1']"),
+            ("ODM-060", "ItemGroupDef[@OID='IG2']"),
+        ]
+
+    def test_reorder_reported_as_collapsed_sequence(self):
+        change = next(
+            c for c in self.result.changes
+            if c.location.endswith("ItemGroupDef[@OID='IG1']") and c.rule == "ODM-060"
+        )
+        assert change.old_value == "Alias → ItemRef×2 → mdsol:LabelRef"
+        assert change.new_value == "ItemRef×2 → Alias → mdsol:LabelRef"
+
+    def test_indentation_kept(self):
+        form = self._get("FormDef", "F1")
+        assert [c.tail for c in form] == ["\n        "] * 3 + ["\n      "]

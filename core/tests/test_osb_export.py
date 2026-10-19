@@ -5,7 +5,8 @@ Regression tests against a real OpenStudyBuilder export.
 ``POST /odms/metadata/xmls/export?targets=OdmForm_000001&target_type=form&allowed_namespaces=*``
 on the OpenStudyBuilder demo database. Unlike the hand-written fixtures it
 carries osb: vendor *elements* (osb:DesignNotes, osb:CompletionInstructions,
-osb:DisplayText, osb:DomainColor), not only osb: attributes.
+osb:DisplayText, osb:DomainColor), not only osb: attributes, and writes Alias
+before ItemGroupRef / ItemRef.
 """
 from __future__ import annotations
 
@@ -53,6 +54,20 @@ def test_real_export_reports_removed_elements():
     assert len(element_strip) == 1
     assert element_strip[0].status == ChangeStatus.APPLIED
     assert "osb:DesignNotes" in element_strip[0].old_value
+
+
+def test_real_export_def_children_in_odm_order():
+    result, out = transform_file(OSB_EXPORT, "rave")
+    root = etree.fromstring(out)
+
+    form = root.find(f".//{{{ODM_NS}}}FormDef")
+    assert [etree.QName(c).localname for c in form] == [
+        "Description", "ItemGroupRef", "ItemGroupRef", "Alias",
+    ]
+    for group in root.iter(f"{{{ODM_NS}}}ItemGroupDef"):
+        names = [etree.QName(c).localname for c in group]
+        assert names == sorted(names, key=["Description", "ItemRef", "Alias"].index)
+    assert {c.rule for c in result.changes} >= {"ODM-059", "ODM-060"}
 
 
 def test_foreign_elements_removed_with_their_children_mdsol_kept():

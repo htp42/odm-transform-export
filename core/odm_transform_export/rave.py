@@ -38,6 +38,10 @@ Transform pipeline (in execution order):
   Fix-10    Skip-when-default    — mdsol: attrs matching Rave defaults removed
   RAVE-116  ItemDef attr→child   — mdsol: attrs promoted to child elements
   RAVE-117  LabelRef order       — mdsol:LabelRef moved after all ItemRef in ItemGroupDef
+  ODM-059   FormDef child order  — Description → ItemGroupRef → ArchiveLayout → Alias,
+            then mdsol: elements (stable sort)
+  ODM-060   ItemGroupDef child order — Description → ItemRef → Alias, then mdsol:
+            elements (stable sort; keeps RAVE-117)
   RAVE-118  ItemDef body order   — child elements reordered to canonical sequence
   RAVE-130  mdsol: unknowns      — attrs not in the Rave schema removed
 
@@ -74,6 +78,12 @@ _XML_NS   = "http://www.w3.org/XML/1998/namespace"
 
 _SASNAME_PATTERN = re.compile(r'^[A-Za-z_][A-Za-z0-9_]{0,7}$')
 _GV_ORDER        = ["StudyName", "StudyDescription", "ProtocolName"]
+
+# ODM 1.3 child sequences checked by ODM-059 / ODM-060 (rules/base.py)
+_DEF_CHILD_ORDERS: list[tuple[str, list[str], str]] = [
+    ("FormDef",      ["Description", "ItemGroupRef", "ArchiveLayout", "Alias"], "ODM-059"),
+    ("ItemGroupDef", ["Description", "ItemRef", "Alias"],                       "ODM-060"),
+]
 
 RAVE_OID_PATTERN = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 
@@ -281,6 +291,11 @@ def transform_for_rave(
 
     # 23. Sort ItemGroupDef: all ItemRef before mdsol:LabelRef (RAVE-117)
     _sort_itemgroup_label_refs(root, nsmap, result)
+
+    # 23b. Reorder FormDef / ItemGroupDef children per ODM 1.3 (ODM-059, ODM-060)
+    #      Runs after RAVE-117; mdsol: elements stay after the ODM ones, so every
+    #      mdsol:LabelRef remains after every ItemRef.
+    _reorder_def_children(root, nsmap, result)
 
     # 24. Reorder ItemDef body children per Rave required sequence (RAVE-118)
     _reorder_itemdef_body(root, nsmap, result)
@@ -1440,6 +1455,79 @@ def _sort_itemgroup_label_refs(
             old_value=f"LabelRef at positions {label_ref_positions}",
             new_value="LabelRef(s) after all ItemRef elements",
         ))
+
+
+# ── Reorder FormDef / ItemGroupDef children per ODM 1.3 (ODM-059, ODM-060) ───
+
+def _reorder_def_children(
+    root: etree._Element, nsmap: dict, result: TransformResult
+) -> None:
+    """
+    Stable-sort FormDef and ItemGroupDef children into the ODM 1.3 sequence.
+
+    ODM elements come first in canonical order, then mdsol: elements in their
+    original relative order (vendor extensions close the ODM content model),
+    then anything else. OSB writes Alias before ItemGroupRef / ItemRef.
+    """
+    odm_uri = nsmap.get("odm", "")
+
+    def label(el: etree._Element) -> str:
+        if not isinstance(el.tag, str):
+            return "#comment"
+        local = etree.QName(el.tag).localname
+        return f"mdsol:{local}" if el.tag.startswith(f"{{{_MDSOL_NS}}}") else local
+
+    def sequence(children: list[etree._Element]) -> str:
+        # Collapse runs so a group of 40 ItemRef reads "ItemRef×40"
+        runs: list[list] = []
+        for c in children:
+            name = label(c)
+            if runs and runs[-1][0] == name:
+                runs[-1][1] += 1
+            else:
+                runs.append([name, 1])
+        return " → ".join(n if k == 1 else f"{n}×{k}" for n, k in runs)
+
+    for tag, order, rule in _DEF_CHILD_ORDERS:
+        rank = {local: i for i, local in enumerate(order)}
+        n = len(order)
+
+        def child_key(el: etree._Element) -> int:
+            if not isinstance(el.tag, str):
+                return n + 2
+            ns_uri, _, local = el.tag[1:].partition("}")
+            if ns_uri == odm_uri:
+                return rank.get(local, n)  # unknown ODM element: after known ones
+            if ns_uri == _MDSOL_NS:
+                return n + 1
+            return n + 2
+
+        for parent in root.iter(q(nsmap, tag)):
+            children = list(parent)
+            if len(children) < 2:
+                continue
+            keys = [child_key(c) for c in children]
+            if keys == sorted(keys):
+                continue  # already in order
+            sorted_children = sorted(children, key=child_key)  # stable
+            # Tails stay with their position so the indentation is unchanged
+            tails = [c.tail for c in children]
+            for c in children:
+                parent.remove(c)
+            for c, tail in zip(sorted_children, tails):
+                c.tail = tail
+                parent.append(c)
+            result.changes.append(Change(
+                status=ChangeStatus.APPLIED, rule=rule,
+                description=(
+                    f"<{tag} OID='{parent.get('OID', '?')}'> child elements "
+                    f"reordered to the ODM 1.3 sequence ({' → '.join(order)}, "
+                    "then mdsol: elements)."
+                ),
+                location=loc(parent),
+                old_value=sequence(children),
+                new_value=sequence(sorted_children),
+            ))
 
 
 # ── Reorder ItemDef body children per Rave required sequence (RAVE-118) ──────

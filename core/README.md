@@ -67,28 +67,39 @@ vendor namespaces (`allowed_namespaces=*`):
 ## Origin
 
 The transform rules come from the ODM XML Validator (`odm-validate` /
-`odm-transform`): `rave.py` and `models.py` are copies of its `transforms/`
-modules, and `rave_schema.py` holds the constants of its Rave rule set. Keep the
-copies in sync when a rule changes.
+`odm-transform`), which is the source of truth for the rules: `rave.py` and
+`models.py` are copies of its `transforms/` modules, and `rave_schema.py` holds
+the constants of its Rave rule set. Make rule changes in the validator first,
+then copy them here.
 
-`rave.py` differs from the validator's copy in one import line and one fix, and
-`transformer.py` adds one more. Both fixes came from running real OpenStudyBuilder
-exports, and should be ported back to the validator:
+`rave.py` is identical to the validator's copy apart from its
+`from .rave_schema import (` line. `transformer.py` follows the validator's, and
+adds the in-memory entry point `transform_odm`, a parser that resolves no
+entities and makes no network access, and no base-ODM (`edc=""`) transform.
 
-- `_strip_foreign_ns_elements` (RAVE-003) removes vendor *elements* such as
-  `osb:DesignNotes`; the validator only removes vendor attributes.
-- `transform_odm` declares `mdsol:` on the root before serialising. Without it,
-  `mdsol:` attributes added to a document that declared no `mdsol` namespace get a
+Running real OpenStudyBuilder exports through the transform found three gaps,
+now fixed in the validator and copied here:
+
+- RAVE-003 also removes vendor *elements* such as `osb:DesignNotes`, not only
+  vendor attributes.
+- `mdsol:` is declared on the root before serialising. Without it, `mdsol:`
+  attributes added to a document that declared no `mdsol` namespace get a
   generated `ns0` prefix, whose declaration is then stripped.
+- `FormDef` and `ItemGroupDef` children are reordered into the ODM 1.3 sequence
+  (ODM-059, ODM-060), with `mdsol:` elements after the ODM ones.
+  OpenStudyBuilder writes `Alias` before `ItemGroupRef` / `ItemRef`.
 
-Without these fixes the output has undeclared namespace prefixes, so it is not
-well-formed XML.
+Without the first two the output has undeclared namespace prefixes, so it is
+not well-formed XML.
 
 ### Known gap
 
-The transform does not reorder `FormDef` and `ItemGroupDef` children.
-OpenStudyBuilder writes `Alias` before `ItemGroupRef` / `ItemRef`, which the ODM 1.3
-schema does not allow (validator rules ODM-059 and ODM-060).
+The transform does not change the `Study` OID unless `rave_study_oid` is given.
+In an OpenStudyBuilder form export it carries the form name
+(`Informed Consent and Demography-OdmForm_000001`), so it can contain spaces,
+which the validator reports as an ODM-020 warning. Run through the validator with
+`edc="rave"`, the transformed `tests/samples/osb_export_informed_consent.xml`
+has that warning and no other issue; with `rave_study_oid` set it has none.
 
 ## Tests
 
