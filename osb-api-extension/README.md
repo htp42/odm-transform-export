@@ -14,9 +14,11 @@ against each new OpenStudyBuilder version.
 
 ## Installation
 
-1. Install the core library in the extensions API's Python environment
-   (`uv pip install ../core` from OpenStudyBuilder's `api/`, or see the Docker and
-   `--with-editable` instructions in the [root README](../README.md)).
+1. Install the core library in the extensions API's own Python environment:
+   `uv pip install -e ../../odm-transform-export/core` from OpenStudyBuilder's
+   `api/` (Docker builds: see the [root README](../README.md)). An overlay such as
+   `uv run --with-editable … poe …` does not work, because `poe` starts the API
+   through a fresh `uv run`.
 2. Copy `odm_transform_export_ext/` to OpenStudyBuilder's `api/extensions/`.
 3. Restart the extensions API. The extension is mounted at
    `/odm-transform-export-ext`.
@@ -65,10 +67,10 @@ The tests run inside OpenStudyBuilder's extensions API, through its extension
 loader. The ODM exporter is mocked, but OpenStudyBuilder's authentication
 dependency writes the request user to Neo4j, so the database configured in
 `api/.env` must be reachable, as for every extension test. From OpenStudyBuilder's
-`api/`, with the extension copied in:
+`api/`, with the extension copied in and the core library installed (step 1):
 
 ```bash
-uv run --with-editable ../../odm-transform-export/core pytest extensions/odm_transform_export_ext
+uv run pytest extensions/odm_transform_export_ext
 ```
 
 OpenStudyBuilder's route-permission test (`uv run poe extensions-testauth`)

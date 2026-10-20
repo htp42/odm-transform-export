@@ -69,13 +69,18 @@ cp -R ../odm-transform-export/osb-api-extension/odm_transform_export_ext api/ext
 cp -R ../odm-transform-export/osb-frontend-extension/odm-transform-export frontend/src/extensions/
 
 cd api
-uv run --with-editable ../../odm-transform-export/core poe extensions-api-dev
+uv pip install -e ../../odm-transform-export/core
+uv run poe extensions-api-dev
 ```
 
-`--with-editable` layers the core library over the API's environment for that
-command only, so a later `uv sync` does not remove it. Start the main API and the
-frontend as usual (`uv run poe dev`, `npm run dev`), open **Library → CRF
-Viewer**, generate a preview and use the export menu.
+The core library has to be installed in the API's own environment: `poe` runs each
+task through a fresh `uv run`, so `uv run --with-editable … poe …` does not reach
+the extensions API. The extension then fails to import, and with `--reload` the
+port stays open with no worker behind it, so requests hang without a response.
+`uv sync` removes the package again; re-run the `uv pip install` after it.
+
+Start the main API and the frontend as usual (`uv run poe dev`, `npm run dev`),
+open **Library → CRF Viewer**, generate a preview and use the export menu.
 
 ## Tests
 
@@ -83,9 +88,10 @@ Viewer**, generate a preview and use the export menu.
 # Core library, standalone
 cd core && pip install -e ".[dev]" && pytest
 
-# API extension, from OpenStudyBuilder's api/ once the extension is copied in
-# (needs the Neo4j database the API is configured for, like every extension test)
-uv run --with-editable ../../odm-transform-export/core pytest extensions/odm_transform_export_ext
+# API extension, from OpenStudyBuilder's api/ once the extension is copied in and
+# the core library installed as above (needs the Neo4j database the API is
+# configured for, like every extension test)
+uv run pytest extensions/odm_transform_export_ext
 ```
 
 ## License
